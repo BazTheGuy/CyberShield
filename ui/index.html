@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberShield</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Three.js 3D Engine (Offline Local) -->
+    <script src="./js/three.min.js"></script>
+    <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+    <div class="cyber-grid-bg"></div>
+
+    <!-- Alert banner -->
+    <div id="cyber-alarm-banner" class="alarm-banner hidden">
+        <div class="alarm-glitch" data-text="WARNING: HIGH SPEED UNKNOWN NETWORK FLOW">WARNING: HIGH SPEED UNKNOWN NETWORK FLOW</div>
+        <div class="alarm-subtext" id="alarm-details">Process: chrome.exe | Speed: 15 MB/s</div>
+        <button onclick="closeAlarm()" class="alarm-close-btn">[ ACKNOWLEDGE ]</button>
+    </div>
+
+    <div class="app-container">
+        <!-- Top Status / Header -->
+        <header class="cyber-header">
+            <div class="logo-area">
+                <span class="glitch-text" data-text="CYBER_SHIELD">CYBER_SHIELD</span>
+                <span class="version-tag">DESKTOP_SYSTEM_CORE // v1.0</span>
+            </div>
+            
+            <div class="stats-ticker">
+                <div class="ticker-item">
+                    <span class="ticker-label">SYS_STATUS:</span>
+                    <span class="ticker-value text-cyan glow-cyan">ONLINE</span>
+                </div>
+                <div class="ticker-item">
+                    <span class="ticker-label">ADMIN_PRIV:</span>
+                    <span id="admin-status" class="ticker-value text-red">CHECKING...</span>
+                </div>
+                <div class="ticker-item">
+                    <span class="ticker-label">ACTIVE_FLOWS:</span>
+                    <span id="total-flows" class="ticker-value text-purple glow-purple">0</span>
+                </div>
+                <div class="ticker-item">
+                    <span class="ticker-label">DOWNLINK_TOTAL:</span>
+                    <span id="total-download" class="ticker-value text-cyan glow-cyan">0.0 KB/s</span>
+                </div>
+                <div class="ticker-item">
+                    <span class="ticker-label">UPLINK_TOTAL:</span>
+                    <span id="total-upload" class="ticker-value text-magenta glow-magenta">0.0 KB/s</span>
+                </div>
+            </div>
+            <button id="settings-btn" class="settings-gear-btn" onclick="openSettings()" title="Settings">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+            </button>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="cyber-nav">
+            <button class="nav-tab active" data-tab="realtime-tab">
+                <span class="nav-icon">//</span> REALTIME_GRID
+            </button>
+            <button class="nav-tab" data-tab="usage-tab">
+                <span class="nav-icon">/\</span> USAGE
+            </button>
+            <button class="nav-tab" data-tab="firewall-tab">
+                <span class="nav-icon">#</span> FIREWALL
+            </button>
+            <button class="nav-tab" data-tab="alerts-tab">
+                <span class="nav-icon">!</span> ALERTS
+            </button>
+            <button class="nav-tab" data-tab="devices-tab">
+                <span class="nav-icon">&lt;&gt;</span> DEVICES
+            </button>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="cyber-main">
+            <!-- TAB 1: Real-time Highway & Process List -->
+            <div id="realtime-tab" class="tab-content active">
+                <div class="realtime-grid">
+                    <!-- Left: Process Feed Panel -->
+                    <section class="panel feed-panel">
+                        <div class="panel-header">
+                            <h2>ACTIVE_DATA_FLOWS</h2>
+                            <div class="panel-header-decor"></div>
+                        </div>
+                        
+                        <div class="feed-controls">
+                            <input type="text" id="process-search" placeholder="FILTER BY PROCESS_NAME..." class="cyber-input">
+                            <div class="speed-threshold-wrapper">
+                                <label for="speed-alarm-input">ALARM AT:</label>
+                                <select id="speed-alarm-input" class="cyber-select">
+                                    <option value="999999999" selected>DISABLED</option>
+                                    <option value="1048576">1 MB/s</option>
+                                    <option value="5242880">5 MB/s</option>
+                                    <option value="10485760">10 MB/s</option>
+                                    <option value="52428800">50 MB/s</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="process-list-container">
+                            <div class="process-list-header">
+                                <span class="col-name">PROCESS_NAME</span>
+                                <span class="col-conn">CONNS</span>
+                                <span class="col-speed">SPEED (D/U)</span>
+                                <span class="col-action">FIREWALL</span>
+                            </div>
+                            <div id="process-list" class="process-list-body">
+                                <div class="loading-state">QUERYING ACTIVE PORT CONNECTIONS...</div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Right: Highway Animation Viewport -->
+                    <section class="panel viewport-panel">
+                        <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center;">
+                            <h2>DATA_GRID_HIGHWAY</h2>
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <button id="mode-3d-btn" class="cyber-btn active" style="font-size: 8px; font-weight: bold; padding: 2px 8px; cursor: pointer;" onclick="setViewportMode('3d')">3D_GRID</button>
+                                <button id="mode-log-btn" class="cyber-btn" style="font-size: 8px; font-weight: bold; padding: 2px 8px; cursor: pointer;" onclick="setViewportMode('log')">LOG_SHELL</button>
+                                <button id="mode-graph-btn" class="cyber-btn" style="font-size: 8px; font-weight: bold; padding: 2px 8px; cursor: pointer;" onclick="setViewportMode('graph')">LIVE_GRAPH</button>
+                                <span class="fps-counter" id="fps-display">60 FPS</span>
+                            </div>
+                        </div>
+                        <div class="canvas-container" style="position: relative;">
+                            <canvas id="highway-canvas" style="display: block;"></canvas>
+                            
+                            <!-- Log Shell Overlay -->
+                            <div id="cli-console-container" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #04050a; font-family: 'Consolas', 'Courier New', monospace; font-size: 11px; color: #39ff14; padding: 15px; box-sizing: border-box; overflow-y: auto; text-align: left; z-index: 5;">
+                                <div id="console-stream" style="padding-bottom: 20px;">
+                                    <div style="color: #64748b;">[SYSTEM] CYBERSHIELD RAW CLIENT LOGGER REGISTERED // READY...</div>
+                                </div>
+                                <button class="cyber-btn btn-red" style="position: absolute; bottom: 15px; right: 20px; font-size: 8px; font-weight: bold; padding: 2px 8px; cursor: pointer;" onclick="clearConsoleLog()">CLEAR_LOGS</button>
+                            </div>
+                            
+                            <!-- Live Graph Overlay -->
+                            <div id="live-graph-container" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #04050a; padding: 15px; box-sizing: border-box; flex-direction: column; z-index: 5;">
+                                <!-- Granular Controls Row -->
+                                <div class="graph-controls-row" style="display: flex; gap: 15px; margin-bottom: 12px; align-items: center; justify-content: flex-start;">
+                                    <div class="control-group" style="display: flex; align-items: center; gap: 5px;">
+                                        <span style="font-family: var(--font-mono); font-size: 9px; color: var(--text-muted);">FILTER:</span>
+                                        <select id="graph-process-filter" style="background: #090a12; border: 1px solid var(--border-color); color: #fff; font-family: var(--font-mono); font-size: 9px; padding: 2px 5px; border-radius: 2px; cursor: pointer;">
+                                            <option value="_total_">SYSTEM_TOTAL</option>
+                                        </select>
+                                    </div>
+                                    <div class="control-group" style="display: flex; align-items: center; gap: 5px;">
+                                        <span style="font-family: var(--font-mono); font-size: 9px; color: var(--text-muted);">TIMESPAN:</span>
+                                        <select id="graph-timescale" style="background: #090a12; border: 1px solid var(--border-color); color: #fff; font-family: var(--font-mono); font-size: 9px; padding: 2px 5px; border-radius: 2px; cursor: pointer;">
+                                            <option value="30">30 Seconds</option>
+                                            <option value="60" selected>60 Seconds</option>
+                                            <option value="300">5 Minutes</option>
+                                        </select>
+                                    </div>
+                                    <div class="control-group" style="display: flex; align-items: center; gap: 5px;">
+                                        <span style="font-family: var(--font-mono); font-size: 9px; color: var(--text-muted);">REFRESH:</span>
+                                        <select id="graph-update-rate" style="background: #090a12; border: 1px solid var(--border-color); color: #fff; font-family: var(--font-mono); font-size: 9px; padding: 2px 5px; border-radius: 2px; cursor: pointer;">
+                                            <option value="1000" selected>1s Rate</option>
+                                            <option value="2000">2s Rate</option>
+                                            <option value="5000">5s Rate</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div style="flex: 1 1 auto; min-height: 0; position: relative; width: 100%; height: calc(100% - 40px);">
+                                    <canvas id="live-telemetry-line-chart" style="width: 100%; height: 100%; display: block;"></canvas>
+                                </div>
+                            </div>
+                            <div class="hologram-decor tl-decor" id="decor-tl">FLOW_VIZ_ACTIVE</div>
+                            <div class="hologram-decor br-decor" id="decor-br">HIGHWAY_LANE_PERSPECTIVE // ANG_30</div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- TAB 2: Usage Breakdown (GlassWire Style) -->
+            <div id="usage-tab" class="tab-content">
+                <div class="usage-grid">
+                    <!-- Range Selector Control Bar -->
+                    <div class="panel usage-controls-panel">
+                        <div class="panel-header">
+                            <h2>USAGE_FILTERS</h2>
+                        </div>
+                        <div class="usage-filters">
+                            <div class="filter-group">
+                                <span class="filter-label">RANGE:</span>
+                                <div class="btn-group">
+                                    <button class="cyber-btn preset-btn active" data-range="5m">5M</button>
+                                    <button class="cyber-btn preset-btn" data-range="1h">1H</button>
+                                    <button class="cyber-btn preset-btn" data-range="24h">24H</button>
+                                    <button class="cyber-btn preset-btn" data-range="7d">7D</button>
+                                </div>
+                            </div>
+                            <div class="filter-group">
+                                <span class="filter-label">CUSTOM:</span>
+                                <div class="date-inputs">
+                                    <input type="datetime-local" id="history-start" class="cyber-input">
+                                    <span class="date-sep">>></span>
+                                    <input type="datetime-local" id="history-end" class="cyber-input">
+                                </div>
+                                <button id="query-history-btn" class="cyber-btn glow-btn btn-magenta">QUERY</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Usage Stats Section -->
+                    <div class="usage-stats-row">
+                        <!-- Left Panel: Circle chart and summary stats -->
+                        <div class="panel usage-summary-panel">
+                            <div class="panel-header">
+                                <h2>BANDWIDTH_TOTALS</h2>
+                            </div>
+                            <div class="summary-content">
+                                <div class="circle-chart-wrapper">
+                                    <canvas id="usage-summary-chart" width="160" height="160"></canvas>
+                                    <div class="circle-chart-center">
+                                        <span class="circle-title">TOTAL</span>
+                                        <span id="usage-total-val" class="circle-value">0 B</span>
+                                    </div>
+                                </div>
+                                <div class="summary-details">
+                                    <div class="summary-row">
+                                        <span class="summary-icon icon-down">↓</span>
+                                        <div class="summary-col">
+                                            <span class="summary-label">DOWNLOAD</span>
+                                            <span id="usage-down-val" class="summary-value text-cyan">0 B</span>
+                                        </div>
+                                    </div>
+                                    <div class="summary-row">
+                                        <span class="summary-icon icon-up">↑</span>
+                                        <div class="summary-col">
+                                            <span class="summary-label">UPLOAD</span>
+                                            <span id="usage-up-val" class="summary-value text-magenta">0 B</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Panel: Three Columns Breakdown -->
+                        <div class="panel usage-breakdown-panel">
+                            <div class="panel-header">
+                                <h2>NETWORK_BREAKDOWN // TRAFFIC_LOGS</h2>
+                            </div>
+                            <div class="breakdown-columns">
+                                <!-- Column 1: Apps -->
+                                <div class="breakdown-col">
+                                    <div class="col-header">APPS</div>
+                                    <div id="usage-apps-list" class="breakdown-list">
+                                        <div class="loading-state">QUERYING...</div>
+                                    </div>
+                                </div>
+                                <!-- Column 2: Hosts -->
+                                <div class="breakdown-col">
+                                    <div class="col-header">HOSTS</div>
+                                    <div id="usage-hosts-list" class="breakdown-list">
+                                        <div class="loading-state">QUERYING...</div>
+                                    </div>
+                                </div>
+                                <!-- Column 3: Traffic Type -->
+                                <div class="breakdown-col">
+                                    <div class="col-header">TRAFFIC TYPE</div>
+                                    <div id="usage-traffic-list" class="breakdown-list">
+                                        <div class="loading-state">QUERYING...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: Firewall (Blocked Apps List) -->
+            <div id="firewall-tab" class="tab-content">
+                <div class="firewall-layout">
+                    <div class="panel firewall-control-panel">
+                        <div class="panel-header">
+                            <h2>FIREWALL_RULES_CORE</h2>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="status-label">STATUS:</span>
+                                <span class="text-cyan glow-cyan" style="font-size: 11px; font-weight: bold; font-family: var(--font-mono)">SHIELD_ACTIVE</span>
+                            </div>
+                        </div>
+                        <div class="firewall-description">
+                            Manage all firewalled executable files and network block policies established by CyberShield.
+                        </div>
+                    </div>
+
+                    <div class="panel firewall-list-panel">
+                        <div class="panel-header">
+                            <h2>BLOCKED_APPLICATIONS_FEED</h2>
+                        </div>
+                        <div class="blocked-apps-container">
+                            <div class="blocked-apps-header">
+                                <span>APPLICATION_NAME</span>
+                                <span>EXECUTABLE_PATH</span>
+                                <span style="text-align: right; padding-right: 15px;">ACTION</span>
+                            </div>
+                            <div id="blocked-apps-list" class="blocked-apps-body">
+                                <div class="loading-state">SYNCHRONIZING FIREWALL RULES...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: Alerts & Realtime Stream Panel -->
+            <div id="alerts-tab" class="tab-content">
+                <div class="alerts-layout">
+                    <div class="panel alerts-panel">
+                        <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="alerts-subtabs" style="display: flex; gap: 10px;">
+                                <button id="db-alerts-btn" class="cyber-btn subtab-btn active" onclick="switchAlertsSubtab('db-alerts')">SECURITY_ALERTS</button>
+                                <button id="realtime-stream-btn" class="cyber-btn subtab-btn" onclick="switchAlertsSubtab('realtime-stream')">REALTIME_STREAM</button>
+                            </div>
+                            <button id="clear-alerts-btn" class="cyber-btn btn-magenta" style="font-size: 9px; padding: 4px 10px;" onclick="clearAlertsFeed()">CLEAR_FEED_LOGS</button>
+                        </div>
+                        
+                        <!-- Subtab 1: Database Alerts -->
+                        <div id="db-alerts-view" class="alerts-subview active">
+                            <div class="alerts-description" style="padding: 10px 20px; font-family: var(--font-main); font-size: 11px; color: var(--text-muted); line-height: 1.5;">
+                                Logs of newly established connections and first-time remote host communication sequences.
+                            </div>
+                            <div id="alerts-list" class="alerts-feed-body" style="height: calc(100% - 70px); overflow-y: auto;">
+                                <div class="loading-state">QUERYING SECURITY AUDIT ALERTS...</div>
+                            </div>
+                        </div>
+
+                        <!-- Subtab 2: Realtime Alert Stream -->
+                        <div id="realtime-stream-view" class="alerts-subview" style="display: none; height: 100%; min-height: 0;">
+                            <div class="alerts-description" style="padding: 10px 20px; font-family: var(--font-main); font-size: 11px; color: var(--text-muted); line-height: 1.5;">
+                                Realtime scrolling stream of newly discovered network sockets and socket endpoints.
+                            </div>
+                            <div class="console-body" style="height: calc(100% - 150px); overflow-y: auto; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); margin: 0 20px 20px 20px; padding: 15px; border-radius: 4px;">
+                                <div id="realtime-alerts-log" class="console-stream" style="font-family: var(--font-mono); font-size: 11px; color: #fff;">
+                                    <div style="color: var(--text-muted);">MONITOR ACTIVE: Awaiting connection packets...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TAB 3: Local Network Scanner -->
+            <div id="devices-tab" class="tab-content">
+                <div class="devices-layout">
+                    <!-- Scanner control header -->
+                    <div class="panel devices-control-panel">
+                        <div class="panel-header">
+                            <h2>NETWORK_SCANNER_CORE // LAN_MAP</h2>
+                            <button id="scan-network-btn" class="cyber-btn glow-btn btn-cyan" onclick="startNetworkScan()">INITIALIZE_LAN_SCAN</button>
+                        </div>
+                        <div class="scanner-status-bar">
+                            <span class="status-label">SCAN_STATUS:</span>
+                            <span id="scan-status-text" class="text-cyan glow-cyan">READY</span>
+                            <div id="scan-progress-bar" class="progress-bar-container hidden">
+                                <div class="progress-bar-fill"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Discovered nodes table list -->
+                    <div class="panel devices-list-panel">
+                        <div class="panel-header">
+                            <h2>DISCOVERED_NODES // SUBNET_MAP</h2>
+                        </div>
+                        <div class="devices-table-container">
+                            <div class="devices-table-header">
+                                <span>STATUS</span>
+                                <span>DEVICE_NAME_VENDOR</span>
+                                <span>IP_ADDRESS</span>
+                                <span>MAC_ADDRESS</span>
+                                <span>NODE_TYPE</span>
+                            </div>
+                            <div id="devices-list" class="devices-table-body">
+                                <div class="empty-state">INITIATE NETWORK SCAN TO MAP LOCAL NODES</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal-overlay hidden">
+        <div class="cyber-modal settings-modal">
+            <div class="modal-decor-top"></div>
+            <div class="modal-header">
+                <h2>SYSTEM_CONFIGURATION</h2>
+                <button onclick="closeSettings()" class="modal-close-btn">X</button>
+            </div>
+            <div class="modal-body">
+                <!-- Theme Selection -->
+                <div class="settings-section">
+                    <h3 class="settings-section-title">COLOR_SCHEME</h3>
+                    <div class="theme-grid" id="theme-grid">
+                        <button class="theme-option active" data-theme="cyber-neon" onclick="setTheme('cyber-neon')">
+                            <div class="theme-preview cyber-neon-preview"></div>
+                            <span>CYBER_NEON</span>
+                        </button>
+                        <button class="theme-option" data-theme="midnight-blue" onclick="setTheme('midnight-blue')">
+                            <div class="theme-preview midnight-blue-preview"></div>
+                            <span>MIDNIGHT_BLUE</span>
+                        </button>
+                        <button class="theme-option" data-theme="blood-moon" onclick="setTheme('blood-moon')">
+                            <div class="theme-preview blood-moon-preview"></div>
+                            <span>BLOOD_MOON</span>
+                        </button>
+                        <button class="theme-option" data-theme="matrix-green" onclick="setTheme('matrix-green')">
+                            <div class="theme-preview matrix-green-preview"></div>
+                            <span>MATRIX_GREEN</span>
+                        </button>
+                        <button class="theme-option" data-theme="stealth" onclick="setTheme('stealth')">
+                            <div class="theme-preview stealth-preview"></div>
+                            <span>STEALTH</span>
+                        </button>
+                    </div>
+                </div>
+
+
+
+                <!-- Toggles -->
+                <div class="settings-section">
+                    <h3 class="settings-section-title">DISPLAY_OPTIONS</h3>
+                    <div class="settings-toggles">
+                        <div class="toggle-row">
+                            <span class="toggle-label">LAUNCH_ON_STARTUP</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="startup-toggle" onchange="toggleStartup(this.checked)">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-row">
+                            <span class="toggle-label">SPEED_ALARM_THRESHOLD</span>
+                            <select id="settings-alarm-input" class="cyber-select" onchange="setAlarmFromSettings(this.value)">
+                                <option value="999999999" selected>DISABLED</option>
+                                <option value="1048576">1 MB/s</option>
+                                <option value="5242880">5 MB/s</option>
+                                <option value="10485760">10 MB/s</option>
+                                <option value="52428800">50 MB/s</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- About / System Info -->
+                <div class="settings-section" style="border-top: 1px solid var(--border-color); padding-top: 15px; margin-top: 15px;">
+                    <h3 class="settings-section-title">ABOUT_CYBERSHIELD</h3>
+                    <div style="display: grid; grid-template-columns: 100px 1fr; gap: 6px 10px; font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); align-items: baseline;">
+                        <span>PUBLISHER:</span><span class="text-cyan glow-cyan" style="font-weight: bold;">Baz Labs</span>
+                        <span>VERSION:</span><span style="color: #fff;">v1.0</span>
+                        <span>REPOSITORY:</span><a href="https://github.com/BazTheGuy/CyberShield" target="_blank" style="color: var(--neon-cyan); text-decoration: none; font-size: 10px;">github.com/BazTheGuy/CyberShield</a>
+                        <span>DONATE:</span><a href="https://ko-fi.com/baztheguy" target="_blank" style="color: #ff5e5b; text-decoration: none; font-size: 10px;">Support my cats' lavish lifestyle</a>
+                        <div style="grid-column: 1 / -1; margin-top: 5px; display: flex; align-items: center; gap: 10px;">
+                            <button id="chk-updates-btn" class="cyber-btn" style="font-size: 8px; padding: 4px 10px; font-weight: bold; cursor: pointer;" onclick="checkUpdates()">CHECK_FOR_UPDATES</button>
+                            <span id="update-status" style="font-size: 9px; font-weight: bold;"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-decor-bottom"></div>
+        </div>
+    </div>
+
+    <!-- Inspector Modal -->
+    <div id="inspector-modal" class="modal-overlay hidden">
+        <div class="cyber-modal">
+            <div class="modal-decor-top"></div>
+            <div class="modal-header">
+                <h2>APP_PORT_INSPECTOR</h2>
+                <button onclick="closeInspector()" class="modal-close-btn">X</button>
+            </div>
+            <div class="modal-body">
+                <div class="inspector-summary">
+                    <div class="inspector-title-row">
+                        <span id="inspect-app-name" class="inspect-title">chrome.exe</span>
+                        <span id="inspect-firewall-tag" class="firewall-badge unblocked">ACTIVE</span>
+                    </div>
+                    <div class="inspector-detail-row">
+                        <span class="detail-label">EXECUTABLE_PATH:</span>
+                        <span id="inspect-app-path" class="detail-value text-share-mono">C:/Program Files/Google/Chrome/chrome.exe</span>
+                    </div>
+                    <div class="inspector-detail-row">
+                        <span class="detail-label">ESTIMATED_SPEED:</span>
+                        <span id="inspect-app-speed" class="detail-value text-cyan">0.0 KB/s</span>
+                    </div>
+                </div>
+
+                <div class="firewall-action-panel">
+                    <h3>SECURE_GATEWAY_CONTROLS</h3>
+                    <div class="firewall-controls-wrapper">
+                        <p>Apply Windows Filtering Platform kernel block policy for this executable. Disconnects all active port listeners.</p>
+                        <button id="inspect-block-btn" class="cyber-btn glow-btn btn-red">INITIALIZE_FIREWALL_BLOCK</button>
+                    </div>
+                </div>
+
+                <div class="connections-list-panel">
+                    <h3>ACTIVE_SOCKET_CONNECTIONS</h3>
+                    <div class="connections-table-container">
+                        <div class="conn-table-header">
+                            <span>PROTOCOL</span>
+                            <span>LOCAL_PORT</span>
+                            <span>REMOTE_IP_ADDRESS</span>
+                            <span>RESOLVED_HOSTNAME</span>
+                            <span>STATUS</span>
+                        </div>
+                        <div id="inspect-connections-list" class="conn-table-body">
+                            <div class="loading-state">Scanning socket handles...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-decor-bottom"></div>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+    <script src="./js/app.js"></script>
+</body>
+</html>
