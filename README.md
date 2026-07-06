@@ -1,6 +1,6 @@
 ## CyberShield v1.0
 <p align="center">
-  <img src="screenshot.png" alt="CyberShield" width="150" height="150">
+  <img src="screenshot.png" alt="CyberShield" width="1920" height="640">
 </p>
 
 # CyberShield
