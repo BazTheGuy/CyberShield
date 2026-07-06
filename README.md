@@ -1,4 +1,9 @@
 ## CyberShield v1.0
+<p align="center">
+  <img src="screenshot.png" alt="CyberShield" width="150" height="150">
+</p>
+
+# CyberShield
 
 ### Core Functionality
 
