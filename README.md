@@ -1,10 +1,4 @@
 ## CyberShield v1.0
-<p align="center">
-  <img src="screenshot.png" alt="CyberShield User Interface" width="800">
-</p>
-CyberShield is a Windows desktop application that provides real-time network telemetry and interactive process-level firewall controls, packaged in a cyberpunk-themed interface. It utilizes a PyWebView and Flask backend paired with a frontend driven by HTML5, CSS, and JavaScript.
-
----
 
 ### Core Functionality
 
